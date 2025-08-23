@@ -6,8 +6,8 @@ mod writeHelper;
 mod types;
 mod test;
 use crate::test::{test};
-use crate::types::{AREA_1_PACKAGE, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
-use crate::writeHelper::{segments_to_hex, send_hex_string};
+use crate::types::{AREA_1_PACKAGE, COMMS_PACKAGE, ODU_PACKAGE, SEVEN_SEGMENT_LETTER_LOOKUP, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
+use crate::writeHelper::{segments_to_hex, send_hex_string, write_package_to_ufc};
 use anyhow::{ anyhow, Context, Result };
 use hidapi::{HidApi, HidDevice};
 
@@ -51,21 +51,23 @@ fn main() -> Result<()>{
 
     // test();
 
-    let mut test_vec: Vec<String> = Vec::new();
-    for i in 3..=9{
-        test_vec.push("A_".to_string() + &i.to_string());
-        test_vec.push("B_".to_string() + &i.to_string());
-        test_vec.push("C_".to_string() + &i.to_string());
-        test_vec.push("D_".to_string() + &i.to_string());
-        test_vec.push("E_".to_string() + &i.to_string());
-        test_vec.push("F_".to_string() + &i.to_string());
-        // test_vec.push("G_".to_string() + &i.to_string());
-    }
 
 
 
-    // let area_1: AREA_1_PACKAGE = {chars: vec!['X', 'Y'];};
-    // let test:UFC_PACKAGE = {};
+
+    let area_1 = AREA_1_PACKAGE{chars: vec!['X', 'Y','1','.','2','3','4','.','5']};
+    let odu_1 = ODU_PACKAGE{ id: 1, is_selected: false, text: "ABCD".to_string() };
+    let odu_2 = ODU_PACKAGE{ id: 2, is_selected: false, text: "EFGH".to_string() };
+    let odu_3 = ODU_PACKAGE{ id: 3, is_selected: false, text: "IJKL".to_string() };
+    let odu_4 = ODU_PACKAGE{ id: 4, is_selected: false, text: "MNOP".to_string() };
+    let odu_5 = ODU_PACKAGE{ id: 5, is_selected: false, text: "QRST".to_string() };
+    let comms_pack_left = COMMS_PACKAGE{ is_left: false, char: 'A' };
+    let comms_pack_right = COMMS_PACKAGE{ is_left: true, char: 'B' };
+    let odus = vec![odu_1, odu_2, odu_3, odu_4, odu_5];
+    let comms = vec![comms_pack_left,comms_pack_right];
+    let test = UFC_PACKAGE{ area_1, odu: odus, comms: comms };
+
+    write_package_to_ufc(test, &device);
 
     // if let Some(segment_string) = SIXTEEN_SEGMENT_LETTER_LOOKUP.get("B") {
     //     for segment in segment_string.chars() {
@@ -74,11 +76,6 @@ fn main() -> Result<()>{
     // } else {
     //     panic!("No segment found for 'A'");
     // }
-
-
-    let a = segments_to_hex(test_vec, "AREA_1".to_string());
-
-    let _ = send_hex_string(&device, a, 0.1);
 
     return Ok(());
 }

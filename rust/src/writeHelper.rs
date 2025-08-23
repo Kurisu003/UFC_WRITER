@@ -4,7 +4,7 @@ use hidapi::{ HidDevice };
 use std::thread;
 use std::time::Duration;
 
-use crate::types::{AREA_1_BITS, COMMS_BITS, ODU_BITS};
+use crate::types::{AREA_1_BITS, AREA_1_PACKAGE, COMMS_BITS, ODU_BITS, SEVEN_SEGMENT_LETTER_LOOKUP, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
 
 fn parse_hex_line(line: &str) -> Result<Vec<u8>> {
     // Strip comments after '#'
@@ -104,7 +104,6 @@ pub fn segments_to_bits(segments: Vec<String>, area: String) -> ((String, String
 
     // pad with 0s at end
     bit_string.push_str(&"0".repeat(128-97));
-    println!("{:?}", bit_string);
 
     return (prefixes, bit_string);
 }
@@ -156,4 +155,55 @@ pub fn send_hex_string(device: &HidDevice, hex_lines: Vec<String>, delay_secs: f
     }
 
     Ok(sent)
+}
+
+fn write_area_1_package(package: AREA_1_PACKAGE, device: &HidDevice){
+    let first_2: Vec<char> = package.chars[..2].to_vec();
+    let seven_seg = package.chars[2..].to_vec();
+
+    let mut segments_vec: Vec<String> = Vec::new();
+
+    // First 2, 16 segment display elements
+    for i in 0..2{
+        if let Some(segment_string) = SIXTEEN_SEGMENT_LETTER_LOOKUP.get(&first_2[i].to_string()) {
+            for segment in segment_string.chars() {
+                segments_vec.push(segment.to_string() + "_"+&(i+1).to_string());
+            }
+        } else {
+            panic!("No segment found for {}", first_2[i]);
+        }
+    }
+
+    // Next, 7 segment display elements
+    for i in 2..9{
+        if let Some(segment_string) = SEVEN_SEGMENT_LETTER_LOOKUP.get(&seven_seg[i-2].to_string()) {
+        for segment in segment_string.chars() {
+                segments_vec.push(segment.to_string() + "_"+&(i+1).to_string());
+            }
+        } else {
+            panic!("No segment found for {}", first_2[i]);
+        }
+    }
+
+    let a = segments_to_hex(segments_vec, "AREA_1".to_string());
+
+    let _ = send_hex_string(device, a, 0.1);
+}
+
+pub fn write_package_to_ufc(package: UFC_PACKAGE, device: &HidDevice){
+    write_area_1_package(package.area_1, device);
+
+    // let mut test_vec: Vec<String> = Vec::new();
+    // for i in 3..=9{
+    //     test_vec.push("A_".to_string() + &i.to_string());
+    //     // test_vec.push("B_".to_string() + &i.to_string());
+    //     test_vec.push("C_".to_string() + &i.to_string());
+    //     test_vec.push("D_".to_string() + &i.to_string());
+    //     test_vec.push("E_".to_string() + &i.to_string());
+    //     test_vec.push("F_".to_string() + &i.to_string());
+    //     test_vec.push("G_".to_string() + &i.to_string());
+    // }
+    // let a = segments_to_hex(test_vec, "AREA_1".to_string());
+
+    // let _ = send_hex_string(device, a, 0.1);
 }

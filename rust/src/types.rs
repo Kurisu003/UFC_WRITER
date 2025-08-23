@@ -3,14 +3,13 @@ use phf::phf_map;
 #[derive(Clone, Debug)]
 pub(crate) struct UFC_PACKAGE{
     pub(crate) area_1: AREA_1_PACKAGE,
-    pub(crate) odu: [ODU_PACKAGE; 5],
-    pub(crate) comms: [COMMS_PACKAGE; 2],
+    pub(crate) odu: Vec<ODU_PACKAGE>,
+    pub(crate) comms: Vec<COMMS_PACKAGE>,
 }
 
 #[derive(Clone, Debug)]
 pub(crate) struct AREA_1_PACKAGE{
     pub(crate) chars: Vec<char>,
-    pub(crate) numbers: [u8;7],
 }
 
 #[derive(Clone, Debug)]
@@ -22,7 +21,7 @@ pub(crate) struct ODU_PACKAGE{
 
 #[derive(Clone, Debug)]
 pub(crate) struct COMMS_PACKAGE{
-    pub(crate) id: u8,
+    pub(crate) is_left: bool,
     pub(crate) char: char,
 }
 
@@ -61,9 +60,6 @@ pub(crate) static AREA_1_BITS: phf::Map<&'static str, u32> = phf_map! {
     "F_2"      => 67,
     "G_2"      => 66,
 
-    // "X_1" => 58,
-    // "Y_1" => 57,
-    // "Z_1" => 56,
     "E_3"      => 64,
     "G_3"      => 63,
     "F_3"      => 62,
@@ -293,9 +289,9 @@ pub(crate) static SEVEN_SEGMENT_LETTER_LOOKUP: phf::Map<&'static str, &'static s
     "Y" => "FGBCD",
     "Z" => "ABGED",
     "0" => "ABCDEF",
-    "1" => "FE",
+    "1" => "BC",
     "2" => "ABGED",
-    "3" => "AFGED",
+    "3" => "ABCDG",
     "4" => "FGBC",
     "5" => "AFGCD",
     "6" => "AFEDCG",
