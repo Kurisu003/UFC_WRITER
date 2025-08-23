@@ -51,31 +51,19 @@ fn main() -> Result<()>{
 
     // test();
 
-
-
-
-
     let area_1 = AREA_1_PACKAGE{chars: vec!['X', 'Y','1','.','2','3','4','.','5']};
-    let odu_1 = ODU_PACKAGE{ id: 1, is_selected: false, text: "ABCD".to_string() };
+    let odu_1 = ODU_PACKAGE{ id: 1, is_selected: true, text: "ABCD".to_string() };
     let odu_2 = ODU_PACKAGE{ id: 2, is_selected: false, text: "EFGH".to_string() };
-    let odu_3 = ODU_PACKAGE{ id: 3, is_selected: false, text: "IJKL".to_string() };
+    let odu_3 = ODU_PACKAGE{ id: 3, is_selected: true, text: "IJKL".to_string() };
     let odu_4 = ODU_PACKAGE{ id: 4, is_selected: false, text: "MNOP".to_string() };
-    let odu_5 = ODU_PACKAGE{ id: 5, is_selected: false, text: "QRST".to_string() };
-    let comms_pack_left = COMMS_PACKAGE{ is_left: false, char: 'A' };
-    let comms_pack_right = COMMS_PACKAGE{ is_left: true, char: 'B' };
+    let odu_5 = ODU_PACKAGE{ id: 5, is_selected: true, text: "QRST".to_string() };
+    let comms_pack_left = COMMS_PACKAGE{ is_left: true, char: 'A' };
+    let comms_pack_right = COMMS_PACKAGE{ is_left: false, char: 'B' };
     let odus = vec![odu_1, odu_2, odu_3, odu_4, odu_5];
     let comms = vec![comms_pack_left,comms_pack_right];
     let test = UFC_PACKAGE{ area_1, odu: odus, comms: comms };
 
     write_package_to_ufc(test, &device);
-
-    // if let Some(segment_string) = SIXTEEN_SEGMENT_LETTER_LOOKUP.get("B") {
-    //     for segment in segment_string.chars() {
-    //         test_vec.push(segment.to_string() + "_Right");
-    //     }
-    // } else {
-    //     panic!("No segment found for 'A'");
-    // }
 
     return Ok(());
 }

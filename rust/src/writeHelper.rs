@@ -4,7 +4,7 @@ use hidapi::{ HidDevice };
 use std::thread;
 use std::time::Duration;
 
-use crate::types::{AREA_1_BITS, AREA_1_PACKAGE, COMMS_BITS, ODU_BITS, SEVEN_SEGMENT_LETTER_LOOKUP, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
+use crate::types::{AREA_1_BITS, AREA_1_PACKAGE, COMMS_BITS, COMMS_PACKAGE, ODU_BITS, ODU_PACKAGE, SEVEN_SEGMENT_LETTER_LOOKUP, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
 
 fn parse_hex_line(line: &str) -> Result<Vec<u8>> {
     // Strip comments after '#'
@@ -190,20 +190,55 @@ fn write_area_1_package(package: AREA_1_PACKAGE, device: &HidDevice){
     let _ = send_hex_string(device, a, 0.1);
 }
 
+fn write_odu(package: ODU_PACKAGE, device: &HidDevice){
+
+    let mut segments_vec: Vec<String> = Vec::new();
+
+    // First 2, 16 segment display elements
+    for (i, letter) in package.text.chars().into_iter().enumerate(){
+        if let Some(segment_string) = SIXTEEN_SEGMENT_LETTER_LOOKUP.get(&letter.to_string()) {
+            for segment in segment_string.chars() {
+                segments_vec.push(segment.to_string() + "_"+&(i+1).to_string());
+            }
+        } else {
+            panic!("No segment found for {}", letter);
+        }
+    }
+    if(package.is_selected){segments_vec.push(":".to_string());}
+
+    let a = segments_to_hex(segments_vec, "ODU_".to_string()+ &package.id.to_string());
+
+    let _ = send_hex_string(device, a, 0.1);
+}
+
+fn write_comms(package_vec: Vec<COMMS_PACKAGE>, device: &HidDevice){
+    let mut segments_vec: Vec<String> = Vec::new();
+    for comms_package in package_vec{
+
+        let suffix = if(comms_package.is_left) {"_Left"} else {"_Right"};
+
+        // First 2, 16 segment display elements
+        if let Some(segment_string) = SIXTEEN_SEGMENT_LETTER_LOOKUP.get(&comms_package.char.to_string()) {
+            for segment in segment_string.chars() {
+                segments_vec.push(segment.to_string() + &suffix.to_string());
+            }
+        }else {
+            panic!("No segment found for {}", comms_package.char);
+        }
+    }
+
+    let a = segments_to_hex(segments_vec, "COMMS".to_string());
+
+    let _ = send_hex_string(device, a, 0.1);
+}
+
+
 pub fn write_package_to_ufc(package: UFC_PACKAGE, device: &HidDevice){
     write_area_1_package(package.area_1, device);
 
-    // let mut test_vec: Vec<String> = Vec::new();
-    // for i in 3..=9{
-    //     test_vec.push("A_".to_string() + &i.to_string());
-    //     // test_vec.push("B_".to_string() + &i.to_string());
-    //     test_vec.push("C_".to_string() + &i.to_string());
-    //     test_vec.push("D_".to_string() + &i.to_string());
-    //     test_vec.push("E_".to_string() + &i.to_string());
-    //     test_vec.push("F_".to_string() + &i.to_string());
-    //     test_vec.push("G_".to_string() + &i.to_string());
-    // }
-    // let a = segments_to_hex(test_vec, "AREA_1".to_string());
+    for odu_pacakge in package.odu{
+        write_odu(odu_pacakge, device);
+    }
 
-    // let _ = send_hex_string(device, a, 0.1);
+    write_comms(package.comms, device);
 }

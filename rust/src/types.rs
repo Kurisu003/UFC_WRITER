@@ -118,7 +118,7 @@ pub(crate) static AREA_1_BITS: phf::Map<&'static str, u32> = phf_map! {
 };
 
 pub(crate) static ODU_BITS: phf::Map<&'static str, u32> = phf_map! {
-    ":"  =>94,
+    ":"  =>97,
     "O_1"=>93,
     "J_1"=>92,
     "H_1"=>91,
