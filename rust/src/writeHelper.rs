@@ -187,10 +187,10 @@ fn write_area_1_package(package: AREA_1_PACKAGE, device: &HidDevice){
 
     let a = segments_to_hex(segments_vec, "AREA_1".to_string());
 
-    let _ = send_hex_string(device, a, 0.1);
+    let _ = send_hex_string(device, a, 0.01);
 }
 
-fn write_odu(package: ODU_PACKAGE, device: &HidDevice){
+fn write_odu(package: ODU_PACKAGE, device: &HidDevice) -> Option<Vec<char>>{
 
     let mut segments_vec: Vec<String> = Vec::new();
 
@@ -207,11 +207,16 @@ fn write_odu(package: ODU_PACKAGE, device: &HidDevice){
     if(package.is_selected){segments_vec.push(":".to_string());}
 
     let a = segments_to_hex(segments_vec, "ODU_".to_string()+ &package.id.to_string());
+    let condition_for_sendback = a[2].chars().nth(14)? == '1' && a[2].chars().nth(15)? == '6';
 
-    let _ = send_hex_string(device, a, 0.1);
+    let _ = send_hex_string(device, a.clone(), 0.01);
+    if (condition_for_sendback) {
+        return Some(a[2].chars().collect())
+    }
+    return None;
 }
 
-fn write_comms(package_vec: Vec<COMMS_PACKAGE>, device: &HidDevice){
+fn write_comms(package_vec: Vec<COMMS_PACKAGE>, last_odu_package:String, device: &HidDevice){
     let mut segments_vec: Vec<String> = Vec::new();
     for comms_package in package_vec{
 
@@ -227,18 +232,31 @@ fn write_comms(package_vec: Vec<COMMS_PACKAGE>, device: &HidDevice){
         }
     }
 
-    let a = segments_to_hex(segments_vec, "COMMS".to_string());
+    let mut a = segments_to_hex(segments_vec, "COMMS".to_string());
+    // LOGICAL OR COMBINE OF a AND last_odu_package HERE
+    // Because otherwise last ODU Letter gets overwritten
+    let last_odu_letter_decimal = u128::from_str_radix(&last_odu_package, 16).unwrap();
+    let a_0_package = u128::from_str_radix(&a[0], 16).unwrap();
+    let a_0_replacement = "0".to_string() + &format!("{:x}", a_0_package | last_odu_letter_decimal);
+    a[0] = a_0_replacement;
 
-    let _ = send_hex_string(device, a, 0.1);
+    let _ = send_hex_string(device, a, 0.01);
 }
 
 
 pub fn write_package_to_ufc(package: UFC_PACKAGE, device: &HidDevice){
     write_area_1_package(package.area_1, device);
 
+    // last letter of last ODU gets sent back because otherwise it gets overwritten
+    let mut last_odu_letter: Vec<char> = Vec::new();
     for odu_pacakge in package.odu{
-        write_odu(odu_pacakge, device);
+        let write_odu_return = write_odu(odu_pacakge, device);
+        match write_odu_return{
+            Some(s) => last_odu_letter = s,
+            None => {}
+        }
     }
+    let last_odu_letter: String = last_odu_letter.into_iter().collect();
 
-    write_comms(package.comms, device);
+    write_comms(package.comms,last_odu_letter, device);
 }
