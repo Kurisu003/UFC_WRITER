@@ -201,12 +201,14 @@ fn write_odu(package: ODU_PACKAGE, device: &HidDevice) -> Option<Vec<char>>{
                 segments_vec.push(segment.to_string() + "_"+&(i+1).to_string());
             }
         } else {
+            println!("{:?}", letter);
             panic!("No segment found for {}", letter);
         }
     }
     if(package.is_selected){segments_vec.push(":".to_string());}
 
     let a = segments_to_hex(segments_vec, "ODU_".to_string()+ &package.id.to_string());
+    // Possible bug here because nth removes the character
     let condition_for_sendback = a[2].chars().nth(14)? == '1' && a[2].chars().nth(15)? == '6';
 
     let _ = send_hex_string(device, a.clone(), 0.01);

@@ -222,6 +222,8 @@ pub(crate) static COMMS_BITS: phf::Map<&'static str, u32> = phf_map! {
 
 // number (eg. the 2 in F_2) has to be added manually after the fact
 pub(crate) static SIXTEEN_SEGMENT_LETTER_LOOKUP: phf::Map<&'static str, &'static str> = phf_map!{
+    " " => "",
+    "?" => "",
     "A" => "JCABGNHI",
     "B" => "ABIOPLEGN",
     "C" => "JCABOP",
@@ -258,10 +260,12 @@ pub(crate) static SIXTEEN_SEGMENT_LETTER_LOOKUP: phf::Map<&'static str, &'static
     "7" => "ABGN",
     "8" => "ABHIOPJNCG",
     "9" => "ABCGHINOP",
-    "/" => "ABCDEFGHIJKLMNOP"
+    "/" => "KF"
 };
 
 pub(crate) static SEVEN_SEGMENT_LETTER_LOOKUP: phf::Map<&'static str, &'static str> = phf_map!{
+    " " => "",
+    "?" => "",
     "A" => "EFABCG",
     "B" => "FEDCG",
     "C" => "AFED",
