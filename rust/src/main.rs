@@ -57,9 +57,10 @@ fn bits_to_hex(bits: &String) -> String{
     return hex_part;
 
 }
+
 fn main() -> Result<()>{
 
-    let device = find_device()?;
+    // let device = find_device()?;
 
     // let prefix_left = "02d0be0000064c".to_string() + &"16".to_string();
     // let prefix_right = "02d0be0000064c".to_string() + &"17".to_string();
