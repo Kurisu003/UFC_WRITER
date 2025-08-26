@@ -1,25 +1,25 @@
 use phf::phf_map;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct UFC_PACKAGE{
     pub(crate) area_1: AREA_1_PACKAGE,
     pub(crate) odu: Vec<ODU_PACKAGE>,
     pub(crate) comms: Vec<COMMS_PACKAGE>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct AREA_1_PACKAGE{
     pub(crate) chars: Vec<char>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ODU_PACKAGE{
     pub(crate) id: u8,
     pub(crate) is_selected: bool,
     pub(crate) text: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct COMMS_PACKAGE{
     pub(crate) is_left: bool,
     pub(crate) char: char,
@@ -242,7 +242,7 @@ pub(crate) static SIXTEEN_SEGMENT_LETTER_LOOKUP: phf::Map<&'static str, &'static
     "P" => "JCABGHI",
     "Q" => "ABGNOPJCM",
     "R" => "JCABGIHM",
-    "S" => "ABDINPO",
+    "S" => "ABCHINPO",
     "T" => "LEAB",
     "U" => "CJOPNG",
     "V" => "CJKF",

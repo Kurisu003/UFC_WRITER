@@ -14,7 +14,7 @@ use std::time::Duration;
 
 use crate::dcsBiosHelper::{get_map, read_stream};
 use crate::test::{test};
-use crate::moduleDataProcessor::{get_AV8B_UFC_PACKAGE, get_module_name};
+use crate::moduleDataProcessor::{get_AV8B_UFC_PACKAGE, get_FA18_UFC_PACKAGE, get_module_name};
 use crate::types::{AREA_1_PACKAGE, COMMS_PACKAGE, ODU_PACKAGE, SEVEN_SEGMENT_LETTER_LOOKUP, SIXTEEN_SEGMENT_LETTER_LOOKUP, UFC_PACKAGE};
 use crate::writeHelper::{segments_to_hex, send_hex_string, write_package_to_ufc};
 use anyhow::{ anyhow, Context, Result };
@@ -74,6 +74,7 @@ fn main() -> Result<()>{
     let comms = vec![comms_pack_left,comms_pack_right];
     let mut ufc_package = UFC_PACKAGE{ area_1, odu: odus, comms: comms };
 
+    let mut last_package = ufc_package.clone();
     loop{
         let map_arc = get_map(); // clone Arc so it lives long enough
 
@@ -88,12 +89,17 @@ fn main() -> Result<()>{
         // yes, I know this gets called every 10ms
         // yes, I know its not performant
         let module_name = get_module_name(&snapshot);
-
         if(module_name.starts_with("AV8B")){
             ufc_package = get_AV8B_UFC_PACKAGE(&snapshot)
         }
+        else if(module_name.starts_with("FA-18")){
+            ufc_package = get_FA18_UFC_PACKAGE(&snapshot)
+        }
 
-        write_package_to_ufc(ufc_package.clone(), &device);
+        if(last_package.clone() != ufc_package.clone()){
+            write_package_to_ufc(ufc_package.clone(), &device);
+            last_package = ufc_package.clone()
+        }
     }
 
     return Ok(());
